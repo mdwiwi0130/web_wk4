@@ -1,4 +1,7 @@
-# 商品價格追蹤系統
+# HW4 通貨膨脹 你關心蛋嗎?
+
+## 作品連結
+[https://github.com/mdwiwi0130/web_wk4](https://github.com/mdwiwi0130/web_wk4)
 
 ## 專案介紹
 
@@ -9,75 +12,7 @@
 3. **市場透明度需求**：幫助消費者了解市場行情，做出更明智的購買決策
 4. **產業價值**：協助養殖業者掌握市場趨勢，優化生產規劃
 
-## 系統特色
-
-1. **即時價格追蹤**
-   - 自動爬蟲功能，定期更新市場價格
-   - 手動輸入功能，支援即時價格記錄
-
-2. **視覺化分析**
-   - 互動式價格趨勢圖表
-   - 支援多時間區間比較
-   - 自動數據抽樣，優化大量數據顯示
-
-3. **智能搜尋功能**
-   - 商品名稱模糊搜尋
-   - 日期範圍篩選
-   - 即時搜尋結果更新
-
-4. **響應式設計**
-   - 支援各種裝置螢幕尺寸
-   - 優化行動裝置使用體驗
-
-## 執行流程
-
-### 1. 環境設置
-
-```bash
-# 安裝必要套件
-npm install
-
-# 啟動伺服器
-npm start
-```
-
-### 2. 系統操作流程
-
-#### 2.1 首頁介面
-![首頁介面](https://i.imgur.com/example1.png)
-- 系統首頁提供三個主要功能區塊：
-  1. 新增商品記錄
-  2. 查詢記錄
-  3. 價格趨勢圖
-
-#### 2.2 新增記錄
-![新增記錄](https://i.imgur.com/example2.png)
-- 手動輸入：
-  1. 選擇日期
-  2. 輸入商品名稱
-  3. 輸入價格
-  4. 點擊「新增記錄」按鈕
-
-- 自動爬蟲：
-  1. 點擊「自動取得吳郭魚價格」按鈕
-  2. 系統自動執行爬蟲
-  3. 顯示執行結果通知
-
-#### 2.3 查詢功能
-![查詢功能](https://i.imgur.com/example3.png)
-- 搜尋方式：
-  1. 輸入商品名稱關鍵字
-  2. 選擇日期範圍
-  3. 點擊「搜尋」按鈕
-
-#### 2.4 價格趨勢圖
-![價格趨勢圖](https://i.imgur.com/example4.png)
-- 圖表功能：
-  1. 自動顯示搜尋結果的價格趨勢
-  2. 支援放大縮小
-  3. 滑鼠懸停顯示詳細資訊
-
-## 技術架構
+## 系統架構
 
 ### 前端技術
 - HTML5
@@ -90,42 +25,120 @@ npm start
 - Express.js
 - SQLite (資料庫)
 
-### 開發工具
-- Visual Studio Code
-- Git (版本控制)
-- Chrome DevTools (除錯工具)
+## 教學說明
 
-## 未來擴充方向
+### 前置準備
 
-1. **多商品支援**
-   - 擴充至其他農產品
-   - 商品分類管理
+1. **安裝必要工具**
+   - Node.js (建議版本 14.0.0 以上)
+   - Git
+   - 程式碼編輯器 (如 VS Code)
 
-2. **進階分析功能**
-   - 價格預測模型
-   - 市場趨勢分析
-   - 匯出報表功能
+2. **取得程式碼**
+   ```bash
+   git clone https://github.com/mdwiwi0130/web_wk4.git
+   cd web_wk4
+   ```
 
-3. **使用者功能**
-   - 會員系統
-   - 價格提醒功能
-   - 個人化設定
+### 系統架設步驟
 
-## 貢獻指南
+1. **安裝依賴套件**
+   ```bash
+   npm install
+   ```
+   這會安裝所有必要的套件，包括：
+   - express：網頁伺服器框架
+   - sqlite3：資料庫
+   - chart.js：圖表視覺化
+   - 其他必要套件
 
-歡迎提交 Pull Request 或開 Issue 來協助改進這個專案。在提交之前，請確保：
+2. **啟動伺服器**
+   ```bash
+   npm start
+   ```
+   伺服器會在 http://localhost:3000 啟動
 
-1. 程式碼符合專案規範
-2. 新增功能包含適當的測試
-3. 更新相關文件
+### 功能說明
 
-## 授權說明
+1. **手動輸入資料**
+   - 從[漁產品批發市場交易行情站](https://efish.fa.gov.tw/efish/statistics/trendchart.htm)下載資料
+   ![行情走勢圖](https://hackmd.io/_uploads/ryQ-4gwzlx.png)
+   - 將民國年轉換為西元年（使用當月30日）
+   - 整理資料格式：
+     ```sql
+     ('2024.1.30', '吳郭魚', 55.5),
+     ('2024.2.30', '吳郭魚', 59.3),
+     ('2024.3.30', '吳郭魚', 64.4),
+     ('2024.4.30', '吳郭魚', 62.8);
+     ```
+   - 在系統中逐筆輸入資訊
+   ![手動輸入](https://hackmd.io/_uploads/SJbBFxDMeg.png)
 
-本專案採用 MIT 授權條款。詳見 [LICENSE](LICENSE) 檔案。
+2. **自動爬蟲功能**
+   - 點擊「自動取得吳郭魚價格」按鈕
+   - 系統自動從[漁產品批發市場交易行情站](https://efish.fa.gov.tw/efish/statistics/simplechart.htm)爬取當前價格
+   - 自動儲存至資料庫
+   ![自動爬蟲](https://hackmd.io/_uploads/BJ9q9gvfge.png)
 
-## 聯絡資訊
+3. **查詢功能**
+   - 基本查詢：顯示最新20筆記錄
+   - 進階查詢：
+     - 使用商品名稱搜尋特定商品
+     - 選擇時間區段查看歷史價格
+     - 自動生成價格趨勢圖
+   ![查詢功能](https://hackmd.io/_uploads/HyQw2xPGlx.png)
+   ![時間區段查詢](https://hackmd.io/_uploads/Bki1pePMex.png)
 
-如有任何問題或建議，歡迎透過以下方式聯絡：
+### 技術實作說明
 
-- Email: your.email@example.com
-- GitHub: [Your GitHub Profile](https://github.com/yourusername) 
+1. **資料庫結構**
+   ```sql
+   CREATE TABLE prices (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     date TEXT NOT NULL,
+     product_name TEXT NOT NULL,
+     avg_price REAL NOT NULL
+   );
+   ```
+
+2. **API 端點**
+   - GET /api/prices：取得價格記錄
+   - POST /api/prices：新增價格記錄
+   - GET /api/prices/search：搜尋價格記錄
+   - POST /api/crawler/run：執行爬蟲
+
+3. **爬蟲功能**
+   ```javascript
+   async function runCrawler() {
+     try {
+       const response = await axios.get('https://efish.fa.gov.tw/efish/statistics/simplechart.htm');
+       // 解析網頁內容
+       // 提取價格資訊
+       // 儲存至資料庫
+     } catch (error) {
+       console.error('爬蟲執行錯誤:', error);
+     }
+   }
+   ```
+
+### 常見問題解決
+
+1. **伺服器無法啟動**
+   - 檢查 Node.js 版本
+   - 確認所有套件都已正確安裝
+   - 檢查 3000 端口是否被占用
+
+2. **爬蟲失敗**
+   - 確認網路連線
+   - 檢查目標網站是否可訪問
+   - 查看錯誤日誌
+
+3. **資料庫錯誤**
+   - 確認資料庫檔案權限
+   - 檢查 SQL 語法
+   - 驗證資料格式
+
+## 參考來源
+- [漁產品批發市場交易行情站](https://efish.fa.gov.tw/efish/statistics/simplechart.htm)
+
+

@@ -659,6 +659,10 @@
         // 禁用按鈕
         const button = document.querySelector('button[onclick="runCrawler()"]');
         button.disabled = true;
+        button.textContent = '爬蟲執行中...';
+        
+        // 顯示執行中狀態
+        showToast('爬蟲執行中，請稍候...', 'info');
         
         // 發送請求
         const response = await fetch('http://localhost:3000/api/crawler/run', {
@@ -697,6 +701,7 @@
         // 重新啟用按鈕
         const button = document.querySelector('button[onclick="runCrawler()"]');
         button.disabled = false;
+        button.textContent = '自動取得吳郭魚價格';
       }
     }
   </script>

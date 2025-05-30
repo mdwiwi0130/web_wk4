@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <title>商品價格追蹤系統</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif;
+    }
+    body {
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+    }
+    h2 {
+      color: #34495e;
+      margin-top: 30px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+    .form-row > .form-group,
+    .form-row > button {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .form-row > button {
+      height: 48px;
+      align-self: stretch;
+      white-space: nowrap;
+    }
+    .form-group {
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .form-group label {
+      display: inline-block;
+      min-width: 80px;
+      color: #2c3e50;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .form-group input {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    .form-group input[type="date"],
+    .form-group input[type="text"],
+    .form-group input[type="number"] {
+      width: 100%;      /* 讓 input 填滿 form-group */
+      min-width: 0;
+      flex-shrink: 1;
+    }
+    .form-group input:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      height: 48px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .search-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .search-box {
+      width: 100%;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    .date-range {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: nowrap;
+    }
+    .date-range .form-group {
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    /* .form-group input[type="date"] {
+      width: 180px;
+      flex-shrink: 0;
+    }
+    .form-group input[type="text"] {
+      width: 200px;
+      flex-shrink: 0;
+    }
+    .form-group input[type="number"] {
+      width: 120px;
+      flex-shrink: 0;
+    } */
+    .date-range button {
+      margin-left: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f8f9fa;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    .price {
+      text-align: right;
+      font-family: monospace;
+    }
+    .date {
+      white-space: nowrap;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      .search-box {
+        flex-direction: column;
+      }
+      .form-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .form-group {
+        width: 100%;
+      }
+      .form-group input[type="date"],
+      .form-group input[type="text"],
+      .form-group input[type="number"] {
+        width: 100%;
+      }
+      button {
+        width: 100%;
+      }
+      th, td {
+        padding: 8px;
+      }
+    }
+    @media (max-width: 900px) {
+      .form-row {
+        flex-direction: column;
+      }
+      .form-row > .form-group,
+      .form-row > button {
+        width: 100%;
+      }
+    }
+    .table-info {
+      margin: 10px 0;
+      color: #666;
+      font-size: 0.9em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .search-status {
+      color: #666;
+      font-style: italic;
+    }
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-style: italic;
+    }
+    .chart-container {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      height: 400px;  /* 固定高度 */
+    }
+    .chart-title {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .crawler-status {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .crawler-status button {
+      margin: 0;
+      white-space: nowrap;
+    }
+    
+    /* 彈窗樣式 */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .toast.show {
+      opacity: 1;
+    }
+    .toast.success {
+      background-color: #4CAF50;
+    }
+    .toast.info {
+      background-color: #2196F3;
+    }
+    .toast.error {
+      background-color: #f44336;
+    }
+    .form-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+    }
+    @media (max-width: 768px) {
+      .form-actions {
+        margin-left: 0;
+        width: 100%;
+        justify-content: stretch;
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>商品價格追蹤系統</h1>
+    
+    <!-- 彈窗容器 -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- 輸入表單 -->
+    <h2>新增商品記錄</h2>
+    <form id="priceForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="date">日期：</label>
+          <input type="date" id="date" required>
+        </div>
+        <div class="form-group">
+          <label for="productName">商品名稱：</label>
+          <input type="text" id="productName" required placeholder="請輸入商品名稱">
+        </div>
+        <div class="form-group">
+          <label for="price">商品價格：</label>
+          <input type="number" id="price" step="0.01" required placeholder="元/公斤">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-actions">
+          <button type="submit">新增記錄</button>
+          <button type="button" onclick="runCrawler()">自動取得吳郭魚價格</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- 查詢功能 -->
+    <h2>查詢記錄</h2>
+    <div class="search-container">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="請輸入商品名稱進行搜尋..." oninput="handleSearch()">
+      </div>
+      <div class="date-range">
+        <div class="form-group">
+          <label for="startDate">開始日期：</label>
+          <input type="date" id="startDate" onchange="handleSearch()">
+        </div>
+        <div class="form-group">
+          <label for="endDate">結束日期：</label>
+          <input type="date" id="endDate" onchange="handleSearch()">
+        </div>
+        <button onclick="searchRecords()">搜尋</button>
+      </div>
+    </div>
+
+    <!-- 資料表格 -->
+    <div class="table-info">
+      <span id="recordCount"></span>
+      <span id="searchStatus" class="search-status"></span>
+    </div>
+
+    <!-- 價格趨勢圖 -->
+    <div class="chart-container" style="display: none;">
+      <div class="chart-title">價格趨勢圖</div>
+      <canvas id="priceChart"></canvas>
+    </div>
+
+    <table id="priceTable">
+      <thead>
+        <tr>
+          <th class="date">日期</th>
+          <th>商品名稱</th>
+          <th class="price">價格(元/公斤)</th>
+        </tr>
+      </thead>
+      <tbody id="priceTableBody">
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let searchTimeout;
+    let lastSearchTerm = '';
+    let isSearching = false;
+    let priceChart = null;
+
+    // 防抖動函數
+    function debounce(func, wait) {
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(searchTimeout);
+          func(...args);
+        };
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(later, wait);
+      };
+    }
+
+    // 顯示彈窗提示
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        
+        // 3秒後自動隱藏
+        setTimeout(() => {
+            toast.className = 'toast';
+        }, 3000);
+    }
+
+    // 載入所有價格記錄
+    async function loadPrices() {
+      try {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const searchTerm = document.getElementById('searchInput').value.trim();
+        
+        let url = 'http://localhost:3000/api/prices?limit=20';
+        if (startDate) url += `&startDate=${startDate}`;
+        if (endDate) url += `&endDate=${endDate}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        priceRecords = data.records;
+        updateTable(data.records);
+        updateRecordCount(data.total, data.limit);
+        document.getElementById('searchStatus').textContent = '';
+        document.querySelector('.chart-container').style.display = 'none';
+      } catch (err) {
+        console.error('載入價格記錄失敗:', err);
+        alert('載入價格記錄失敗');
+      }
+    }
+
+    // 更新記錄數量顯示
+    function updateRecordCount(total, limit) {
+      const countElement = document.getElementById('recordCount');
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      
+      if (!searchTerm && limit) {
+        countElement.textContent = `顯示最新的 ${limit} 筆記錄，共 ${total} 筆`;
+      } else {
+        countElement.textContent = `共 ${total} 筆記錄`;
+      }
+    }
+
+    // 處理搜尋輸入
+    const handleSearch = debounce(async function() {
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      
+      if (searchTerm === '') {
+        await loadPrices();
+        document.querySelector('.chart-container').style.display = 'none';
+        return;
+      }
+
+      if (searchTerm === lastSearchTerm && priceRecords.length > 0) {
+        return; // 如果搜尋詞相同且已有結果，不重複搜尋
+      }
+
+      lastSearchTerm = searchTerm;
+      await searchRecords();
+    }, 500);
+
+    // 處理表單提交
+    document.getElementById('priceForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const date = document.getElementById('date').value;
+      const productName = document.getElementById('productName').value;
+      const avgPrice = parseFloat(document.getElementById('price').value);
+      
+      try {
+        const response = await fetch('/api/prices', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ date, product_name: productName, avg_price: avgPrice })
+        });
+        
+        if (!response.ok) {
+          throw new Error('新增記錄失敗');
+        }
+        
+        // 清空表單
+        e.target.reset();
+        
+        // 重新載入價格記錄
+        await loadPrices();
+        
+        alert('新增記錄成功！');
+      } catch (error) {
+        console.error('新增記錄錯誤:', error);
+        alert('新增記錄失敗：' + error.message);
+      }
+    });
+
+    // 搜尋功能
+    async function searchRecords() {
+      if (isSearching) return;
+      
+      const searchTerm = document.getElementById('searchInput').value.trim();
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const searchStatus = document.getElementById('searchStatus');
+      
+      if (!searchTerm) {
+        await loadPrices();
+        return;
+      }
+
+      try {
+        isSearching = true;
+        searchStatus.textContent = '搜尋中...';
+        
+        let url = `http://localhost:3000/api/prices/search?term=${encodeURIComponent(searchTerm)}`;
+        if (startDate) url += `&startDate=${startDate}`;
+        if (endDate) url += `&endDate=${endDate}`;
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('搜尋請求失敗');
+        }
+        
+        const data = await response.json();
+        priceRecords = data.records;
+        updateTable(data.records);
+        updateRecordCount(data.total, data.limit);
+        
+        if (data.total === 0) {
+          searchStatus.textContent = `找不到包含 "${searchTerm}" 的記錄`;
+          document.querySelector('.chart-container').style.display = 'none';
+        } else {
+          searchStatus.textContent = `找到 ${data.total} 筆包含 "${searchTerm}" 的記錄`;
+          document.querySelector('.chart-container').style.display = 'block';
+        }
+      } catch (err) {
+        console.error('搜尋失敗:', err);
+        searchStatus.textContent = '搜尋失敗，請稍後再試';
+        document.querySelector('.chart-container').style.display = 'none';
+      } finally {
+        isSearching = false;
+      }
+    }
+
+    // 更新表格顯示
+    function updateTable(prices) {
+      const tbody = document.getElementById('priceTableBody');
+      tbody.innerHTML = '';
+      
+      if (prices.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td colspan="3" class="no-results">沒有找到符合的記錄</td>
+        `;
+        tbody.appendChild(row);
+        document.querySelector('.chart-container').style.display = 'none';
+        return;
+      }
+      
+      prices.forEach(price => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="date">${price.date}</td>
+          <td>${price.product_name}</td>
+          <td class="price">NT$ ${price.avg_price.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // 顯示並更新趨勢圖
+      document.querySelector('.chart-container').style.display = 'block';
+      updatePriceChart(prices);
+    }
+
+    // 更新價格趨勢圖
+    function updatePriceChart(prices) {
+      // 按日期排序
+      const sortedPrices = [...prices].sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // 如果數據點太多，進行抽樣
+      let displayPrices = sortedPrices;
+      if (sortedPrices.length > 50) {
+        const step = Math.ceil(sortedPrices.length / 50);
+        displayPrices = sortedPrices.filter((_, index) => index % step === 0);
+      }
+      
+      const dates = displayPrices.map(price => price.date);
+      const avgPrices = displayPrices.map(price => price.avg_price);
+
+      // 如果已存在圖表，先銷毀它
+      if (priceChart) {
+        priceChart.destroy();
+      }
+
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: '平均價格',
+            data: avgPrices,
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 1000
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: '價格趨勢變化'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `NT$ ${context.raw.toFixed(2)}`;
+                }
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45
+              }
+            },
+            y: {
+              beginAtZero: false,
+              ticks: {
+                callback: function(value) {
+                  return 'NT$ ' + value.toFixed(2);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 頁面載入時載入所有記錄
+    document.addEventListener('DOMContentLoaded', loadPrices);
+
+    // 執行爬蟲
+    async function runCrawler() {
+      try {
+        // 禁用按鈕
+        const button = document.querySelector('button[onclick="runCrawler()"]');
+        button.disabled = true;
+        
+        // 發送請求
+        const response = await fetch('http://localhost:3000/api/crawler/run', {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('爬蟲執行結果:', result);
+        
+        // 更新狀態顯示
+        if (result.status) {
+            if (result.status.includes('成功儲存資料')) {
+                showToast('爬蟲執行完成，資料已存入', 'success');
+            } else if (result.status.includes('資料已存在')) {
+                showToast('爬蟲執行完成，資料已存在', 'info');
+            } else if (result.status.includes('失敗')) {
+                showToast(`爬蟲執行失敗：${result.status}`, 'error');
+            } else {
+                showToast(result.status);
+            }
+        } else {
+            showToast('爬蟲執行完成，但未返回狀態', 'error');
+        }
+        
+        // 重新從資料庫載入價格記錄
+        await loadPrices();
+        
+      } catch (error) {
+        console.error('執行爬蟲時發生錯誤:', error);
+        showToast(`爬蟲執行失敗：${error.message}`, 'error');
+      } finally {
+        // 重新啟用按鈕
+        const button = document.querySelector('button[onclick="runCrawler()"]');
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>
